@@ -40,7 +40,12 @@ Project latihan pertama saya selama magang. Ini API sederhana untuk mengelola da
 ```
    bun --watch index.ts
 ```
+
+## Cara membuka
 Server jalan di `http://localhost:3000`.
+
+- **Tampilan web:** buka `http://localhost:3000` di browser. Dari sini bisa cari, tambah, edit, dan hapus user. Setiap aksi menampilkan modal berhasil atau gagal.
+- **API:** semua endpoint ada di alamat `/user` (lihat di bawah).
 
 ## Daftar endpoint
 | Method | Alamat | Fungsi |
