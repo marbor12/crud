@@ -4,7 +4,8 @@ import type { UserInput } from "../types";
 
 export class UserService {
     constructor(private repo: UserRepository) {}
-        list(page: number, limit: number) {
+
+    list(page: number, limit: number) {
         const offset = (page - 1) * limit;
         return this.repo.findAll(limit, offset);
     }
@@ -20,5 +21,19 @@ export class UserService {
             throw new AppError("name dan email wajib diisi", 400);
         }
         return this.repo.create(input);
+    }
+
+    async update(id: number, input: UserInput) {
+        if (!input.name || !input.email) {
+            throw new AppError("name dan email wajib diisi", 400);
+        }
+        const user = await this.repo.update(id, input);
+        if (!user) throw new AppError("user tidak ditemukan", 404);
+        return user;
+    }
+
+    async delete(id: number) {
+        const deleted = await this.repo.delete(id);
+        if (!deleted) throw new AppError("user tidak ditemukan", 404);
     }
 }
