@@ -18,7 +18,12 @@ export function userRoutes(service: UserService) {
         }
         const page = Math.max(Number(c.req.query("page")) || 1, 1);
         const limit = Math.min(Math.max(Number(c.req.query("limit")) || 10, 1), 100);
-        return c.json({ page, limit, data: await service.list(page, limit) });
+        const offsetParam = c.req.query("offset");
+        const offset =
+            offsetParam !== undefined
+                ? Math.max(Number(offsetParam) || 0, 0)
+                : (page - 1) * limit;
+        return c.json({ page, limit, offset, data: await service.list(limit, offset) });
     });
 
     r.post("/", async (c) => {

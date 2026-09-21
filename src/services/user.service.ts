@@ -5,8 +5,7 @@ import type { UserInput } from "../types";
 export class UserService {
     constructor(private repo: UserRepository) {}
 
-    list(page: number, limit: number) {
-        const offset = (page - 1) * limit;
+    list(limit: number, offset: number) {
         return this.repo.findAll(limit, offset);
     }
 
