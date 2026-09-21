@@ -25,6 +25,19 @@ app.get("/user", async (c) => {
     return c.json(users);
 });
 
+app.post("/user", async (c) => {
+    const body = await c.req.json();
+    const { name, email } = body;
+
+    if (!name || !email) {
+       return c.json({ error: "name dan email wajib diisi" }, 400);
+    }
+
+    const result = await sql`INSERT INTO users (name, email) VALUES (${name}, ${email}) RETURNING id, name, email`;
+    return c.json(result[0], 201);
+
+});
+
 export default {
     port: 3000,
     fetch: app.fetch,
