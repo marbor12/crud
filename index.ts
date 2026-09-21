@@ -2,11 +2,11 @@ import { Hono } from "hono";
 import postgres from "postgres";
 
 const sql = postgres({
-    host: "localhost",
-    port: 5432,
-    user: "user",
-    password: "password",
-    database: "user_database",
+    host: process.env.DB_HOST,
+    port: Number(process.env.DB_PORT),
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
     max: 10,
 });
 
