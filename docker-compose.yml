@@ -1,0 +1,13 @@
+services:
+  db:
+    image: postgres:16 #Menu yang dipilih
+    environment: #Setelannya
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: user_database
+    ports: #Alamat mau ngantarnya ke mana
+      - "5432:5432" #Kiri port laptop || kanan itu port di dalam container (docker)
+    volumes: #Disimpan di kulkas -> biar data gak hilang kalau container dimatiin
+      - pgdata:/var/lib/postgresql/data #pgdata itu nama volume, /var/lib/postgresql/data itu tempat penyimpanan di dalam container
+volumes:
+  pgdata:
