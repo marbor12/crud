@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { serveStatic } from "hono/bun";
 import postgres from "postgres";
 import { AppError } from "./src/errors";
 import { PostgresUserRepository } from "./src/repositories/user.repository";
@@ -19,8 +20,8 @@ const userRepo = new PostgresUserRepository(sql);
 const userService = new UserService(userRepo);
 
 const app = new Hono();
-app.get("/", (c) => c.text("CRUD Sederhana dengan Hono"));
 app.route("/user", userRoutes(userService));
+app.use("/*", serveStatic({ root: "./public" }));
 
 // Satu tempat buat nerjemahin error jadi respons
 app.onError((err, c) => {

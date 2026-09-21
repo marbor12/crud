@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Daftar User</title>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --surface: #f8f9fb;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --primary: #2563eb;
+      --danger: #dc2626;
+      --success: #16a34a;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #111827;
+        --surface: #1f2937;
+        --text: #e5e7eb;
+        --muted: #9ca3af;
+        --border: #374151;
+      }
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      font-size: 14px;
+    }
+
+    .page { max-width: 1100px; margin: 0 auto; padding: 32px 24px; }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .header h1 { margin: 0; font-size: 20px; }
+    .header p { margin: 2px 0 0; color: var(--muted); }
+
+    input {
+      display: block;
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 14px;
+    }
+    input:focus { outline: 2px solid var(--primary); outline-offset: -1px; }
+
+    .search { max-width: 320px; margin-bottom: 16px; }
+
+    button {
+      padding: 8px 14px;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      background: var(--primary);
+      color: #fff;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    button:hover { filter: brightness(.92); }
+    button.secondary { background: transparent; border-color: var(--border); color: var(--text); }
+    button.danger { background: var(--danger); }
+
+    button.link {
+      padding: 4px 8px;
+      background: none;
+      color: var(--muted);
+    }
+    button.link:hover { color: var(--primary); filter: none; }
+    button.link.delete:hover { color: var(--danger); }
+
+    table { width: 100%; border-collapse: collapse; }
+    th {
+      padding: 10px 12px;
+      text-align: left;
+      font-weight: 600;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+    }
+    td { padding: 12px; border-bottom: 1px solid var(--border); }
+    tbody tr:hover { background: var(--surface); }
+    .col-id { width: 70px; color: var(--muted); }
+    .col-actions { width: 140px; text-align: right; }
+
+    .empty { text-align: center; padding: 48px 12px; color: var(--muted); }
+
+    dialog {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+      width: min(380px, 92vw);
+      background: var(--bg);
+      color: var(--text);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, .15);
+    }
+    dialog::backdrop { background: rgba(0, 0, 0, .4); }
+    dialog h2 { margin: 0 0 12px; font-size: 17px; }
+    dialog p { margin: 0; color: var(--muted); }
+
+    label { display: block; margin-bottom: 12px; font-size: 13px; color: var(--muted); }
+    label input { margin-top: 4px; }
+
+    .actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
+
+    .result-title.success { color: var(--success); }
+    .result-title.failure { color: var(--danger); }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="header">
+      <div>
+        <h1>Daftar User</h1>
+        <p id="userCount">Memuat data...</p>
+      </div>
+      <button id="addButton" type="button">+ Tambah User</button>
+    </header>
+
+    <input id="searchInput" class="search" type="search" placeholder="Cari nama atau email...">
+
+    <table>
+      <thead>
+        <tr>
+          <th class="col-id">ID</th>
+          <th>Nama</th>
+          <th>Email</th>
+          <th class="col-actions">Aksi</th>
+        </tr>
+      </thead>
+      <tbody id="userTable"></tbody>
+    </table>
+  </main>
+
+  <!-- Modal tambah / edit -->
+  <dialog id="formModal">
+    <h2 id="formTitle"></h2>
+    <form id="userForm">
+      <label>Nama <input id="nameInput" required></label>
+      <label>Email <input id="emailInput" type="email" required></label>
+      <div class="actions">
+        <button type="button" class="secondary" id="formCancel">Batal</button>
+        <button type="submit">Simpan</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Modal konfirmasi hapus -->
+  <dialog id="deleteModal">
+    <h2>Hapus user?</h2>
+    <p id="deleteText"></p>
+    <div class="actions">
+      <button type="button" class="secondary" id="deleteCancel">Batal</button>
+      <button type="button" class="danger" id="deleteConfirm">Hapus</button>
+    </div>
+  </dialog>
+
+  <!-- Modal hasil (sukses / gagal) -->
+  <dialog id="resultModal">
+    <h2 id="resultTitle" class="result-title"></h2>
+    <p id="resultText"></p>
+    <div class="actions">
+      <button type="button" id="resultOk">OK</button>
+    </div>
+  </dialog>
+
+  <script>
+    const API_URL = "/user";
+    const NETWORK_ERROR = "Tidak bisa terhubung ke server.";
+
+    const $ = (id) => document.getElementById(id);
+
+    const userTable = $("userTable");
+    const formModal = $("formModal");
+    const deleteModal = $("deleteModal");
+    const resultModal = $("resultModal");
+    const nameInput = $("nameInput");
+    const emailInput = $("emailInput");
+
+    let users = [];
+    let editingId = null;   // null = mode tambah
+    let deletingId = null;
+
+    // ---------- Helper ----------
+
+    async function request(url, options) {
+      const response = await fetch(url, options);
+      const data = await response.json().catch(() => ({}));
+      return { ok: response.ok, data };
+    }
+
+    function createButton(text, className, onClick) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.textContent = text;
+      button.className = className;
+      button.onclick = onClick;
+      return button;
+    }
+
+    function createCell(text, className = "") {
+      const cell = document.createElement("td");
+      cell.textContent = text;
+      cell.className = className;
+      return cell;
+    }
+
+    function showResult(isSuccess, message) {
+      $("resultTitle").textContent = isSuccess ? "Berhasil" : "Gagal";
+      $("resultTitle").className = `result-title ${isSuccess ? "success" : "failure"}`;
+      $("resultText").textContent = message;
+      resultModal.showModal();
+    }
+
+    // Menjalankan aksi, menutup modal, lalu menampilkan hasilnya.
+    async function runAction({ modal, send, successMessage, failureMessage }) {
+      try {
+        const { ok, data } = await send();
+        modal.close();
+
+        if (!ok) {
+          showResult(false, data.error || failureMessage);
+          return;
+        }
+
+        showResult(true, successMessage);
+        await loadUsers();
+      } catch {
+        modal.close();
+        showResult(false, NETWORK_ERROR);
+      }
+    }
+
+    // ---------- Daftar user ----------
+
+    function createUserRow(user) {
+      const row = document.createElement("tr");
+
+      const actionCell = document.createElement("td");
+      actionCell.className = "col-actions";
+      actionCell.append(
+        createButton("Edit", "link", () => openForm(user)),
+        createButton("Hapus", "link delete", () => openDelete(user)),
+      );
+
+      row.append(
+        createCell(user.id, "col-id"),
+        createCell(user.name),
+        createCell(user.email),
+        actionCell,
+      );
+      return row;
+    }
+
+    function createEmptyRow(isSearching) {
+      const row = document.createElement("tr");
+      const cell = createCell(
+        isSearching ? "Tidak ada user yang cocok." : "Belum ada user. Klik “+ Tambah User” untuk mulai.",
+        "empty",
+      );
+      cell.colSpan = 4;
+      row.appendChild(cell);
+      return row;
+    }
+
+    function renderUsers() {
+      const query = $("searchInput").value.trim().toLowerCase();
+      const visible = users.filter((user) =>
+        `${user.name} ${user.email}`.toLowerCase().includes(query),
+      );
+
+      $("userCount").textContent = `${users.length} user terdaftar`;
+      userTable.replaceChildren(
+        ...(visible.length ? visible.map(createUserRow) : [createEmptyRow(query !== "")]),
+      );
+    }
+
+    async function loadUsers() {
+      try {
+        const { data } = await request(`${API_URL}?page=1&limit=100`);
+        users = data.data ?? [];
+        renderUsers();
+      } catch {
+        $("userCount").textContent = "Gagal memuat data";
+        showResult(false, NETWORK_ERROR);
+      }
+    }
+
+    // ---------- Tambah / edit ----------
+
+    function openForm(user = null) {
+      editingId = user ? user.id : null;
+      $("formTitle").textContent = user ? "Edit User" : "Tambah User";
+      nameInput.value = user ? user.name : "";
+      emailInput.value = user ? user.email : "";
+      formModal.showModal();
+    }
+
+    function submitForm(event) {
+      event.preventDefault();
+      const isEdit = editingId !== null;
+
+      runAction({
+        modal: formModal,
+        send: () =>
+          request(isEdit ? `${API_URL}?id=${editingId}` : API_URL, {
+            method: isEdit ? "PUT" : "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name: nameInput.value, email: emailInput.value }),
+          }),
+        successMessage: isEdit ? "User berhasil diubah." : "User berhasil ditambahkan.",
+        failureMessage: "Gagal menyimpan user.",
+      });
+    }
+
+    // ---------- Hapus ----------
+
+    function openDelete(user) {
+      deletingId = user.id;
+      $("deleteText").textContent = `${user.name} (${user.email}) akan dihapus.`;
+      deleteModal.showModal();
+    }
+
+    function confirmDelete() {
+      runAction({
+        modal: deleteModal,
+        send: () => request(`${API_URL}?id=${deletingId}`, { method: "DELETE" }),
+        successMessage: "User berhasil dihapus.",
+        failureMessage: "Gagal menghapus user.",
+      });
+    }
+
+    // ---------- Event ----------
+
+    $("addButton").onclick = () => openForm();
+    $("searchInput").addEventListener("input", renderUsers);
+    $("formCancel").onclick = () => formModal.close();
+    $("userForm").addEventListener("submit", submitForm);
+    $("deleteCancel").onclick = () => deleteModal.close();
+    $("deleteConfirm").onclick = confirmDelete;
+    $("resultOk").onclick = () => resultModal.close();
+
+    loadUsers();
+  </script>
+</body>
+</html>
