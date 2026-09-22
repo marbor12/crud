@@ -1,0 +1,6 @@
+HTTP/1.1 200 OK
+Content-Type: application/json
+Date: Tue, 22 Sep 2026 03:22:34 GMT
+Content-Length: 62
+
+{"id":1,"name":"Maria Siboro","email":"mariaboro01@gmail.com"}

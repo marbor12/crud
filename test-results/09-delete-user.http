@@ -1,0 +1,6 @@
+HTTP/1.1 200 OK
+Content-Type: application/json
+Date: Tue, 22 Sep 2026 03:25:41 GMT
+Content-Length: 34
+
+{"message":"user dihapus","id":10}

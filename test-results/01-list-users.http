@@ -1,0 +1,6 @@
+HTTP/1.1 200 OK
+Content-Type: application/json
+Date: Tue, 22 Sep 2026 03:03:42 GMT
+Content-Length: 228
+
+{"page":1,"limit":10,"offset":0,"data":[{"id":1,"name":"User Diupdate","email":"update@example.com"},{"id":4,"name":"Sarah Jenkins","email":"sarah@gmail.com"},{"id":6,"name":"Rest Client Test","email":"restclient@example.com"}]}

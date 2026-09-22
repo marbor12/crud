@@ -1,0 +1,6 @@
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+Date: Tue, 22 Sep 2026 03:26:15 GMT
+Content-Length: 32
+
+{"error":"user tidak ditemukan"}

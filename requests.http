@@ -1,0 +1,63 @@
+@baseUrl = http://localhost:3000
+
+### List semua user
+GET {{baseUrl}}/user
+
+### Detail user yang ada
+GET {{baseUrl}}/user?id=1
+
+### Detail user yang tidak ada
+GET {{baseUrl}}/user?id=999
+
+### Tambah user baru
+POST {{baseUrl}}/user
+Content-type: application/json
+
+{
+    "name": "Bobby",
+    "email": "bobby@example.com"
+}
+
+### Tambah user dengan email yang sama
+POST {{baseUrl}}/user
+Content-type: application/json
+
+{
+    "name": "Duplikat",
+    "email": "bobby@example.com"
+}
+
+### Update user yang ada
+PUT {{baseUrl}}/user?id=1
+Content-Type: application/json
+
+{
+    "name": "Maria Siboro",
+    "email": "mariaboro01@gmail.com"
+}
+
+### Update user yang tidak ada
+PUT {{baseUrl}}/user?id=999
+Content-Type: application/json
+
+{
+    "name": "Tidak ada",
+    "email": "tidakada@example.com"
+}
+
+### Update tanpa email
+PUT {{baseUrl}}/user?id=1
+Content-type: application/json
+
+{
+    "name": "Tidak ada email"
+}
+
+### Hapus user
+DELETE {{baseUrl}}/user?id=10
+
+#### Hapus user yang sama lagi
+DELETE {{baseUrl}}/user?id=10
+
+### Hapus dengan id bukan angka
+DELETE {{baseUrl}}/user?id=abc
