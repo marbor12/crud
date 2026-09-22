@@ -110,6 +110,25 @@ src/
 Alur satu request: **route -> service -> repository -> database**, lalu balik lagi.
 Saya pisahkan jadi tiga lapis supaya tiap file punya satu tugas (belajar prinsip SOLID).
 
+## Testing
+### Manual testing (REST Client)
+Semua skenario endpoint (sukses, gagal, validasi) ada di `requests.http`. Buka file itu di VS Code dengan extension **REST Client**, lalu klik "Send Request" di atas tiap baris.
+
+Hasil tiap skenario yang sudah dites disimpan di folder `test-results/` sebagai bukti.
+
+### Load testing (k6)
+Untuk menguji performa server di bawah beban banyak pengguna:
+
+```
+k6 run load-test.js
+```
+
+Testing ini mengecek:
+- 95% request harus selesai di bawah waktu tertentu
+- Request yang gagal harus di bawah 1%
+
+Sudah diuji dengan 5 dan 20 pengguna bersamaan (lebih dari `max: 10` di connection pool), hasilnya stabil tanpa request gagal.
+
 ## Catatan belajar
 - Password database ada di file `.env` yang tidak ikut ke GitHub (sudah masuk `.gitignore`).
 - Koneksi database memakai *connection pool* (`max: 10`), jadi koneksi dipakai bergantian, bukan dibuka-tutup tiap request.
