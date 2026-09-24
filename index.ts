@@ -13,6 +13,9 @@ const sql = postgres({
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
     max: 10,
+    idle_timeout: 20,
+    connect_timeout: 10,
+    max_lifetime: 60 * 30,
 });
 
 // Merakit: repository -> service -> route

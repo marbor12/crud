@@ -2,8 +2,8 @@ import http from "k6/http";
 import { check, sleep } from "k6";
 
 export const options = {
-    vus: 20, // in case ada 5 orang buka website secara bersamaan
-    duration: "15s", // selama 10 detik
+    vus: 20, // in case ada 20 orang buka website secara bersamaan
+    duration: "40s", // selama 10 detik
     thresholds: {
         // syarat 1: 95% dari mereka harus selesai di bawah 500 milidetik
         http_req_duration: ["p(95)<500"],
